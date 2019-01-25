@@ -1,6 +1,8 @@
 // 生成九宫格
 
 const Toolkit = require("../core/toolkit");
+const Generator = require("../core/generator");
+const Sudoku = require("../core/sudoku");
 
 class Grid {
   constructor(container) {
@@ -8,7 +10,13 @@ class Grid {
   }
 
   build() {
-    const matrix = Toolkit.matrix.makeMatrix();
+    // const generator = new Generator();
+    // generator.generate();
+    // const matrix = generator.matrix;
+
+    const sudoku = new Sudoku();
+    sudoku.make(4);
+    const matrix = sudoku.puzzleMatrix;
 
     const rowGroupClasses = ["row_g_top", "row_g_middle", "row_g_bottom"];
     const colGroupClasses = ["col_g_left", "col_g_center", "col_g_right"];
@@ -17,6 +25,7 @@ class Grid {
       .map((cellValue, colIndex) => {
         return $("<span>")
             .addClass(colGroupClasses[colIndex % 3])
+            .addClass(cellValue ? "fixed" : "empty")
             .text(cellValue)
     }));
 
@@ -38,6 +47,41 @@ class Grid {
         "line-height": `${width}px`,
         "font-size": width < 32 ? `${width / 2}px` : ""
       })
+  }
+
+  bindPopup(popupNumbers) {
+    this._$container.on("click", "span", e => {
+      const $cell = $(e.target);
+      popupNumbers.popup($cell);
+    });
+  }
+
+  /**
+   * 检查用户解谜的结果，成功进行提示，失败提示错误位置的标记
+   */
+  check() {
+  }
+
+  /**
+   * 重置当前谜盘到初始状态
+   */
+  reset() {
+  }
+
+
+  /**
+   * 清理错误标记
+   */
+  clear() {
+  }
+
+  /**
+   * 重建新的谜盘，开始新一局
+   */
+  rebuild() {
+    this._$container.empty();
+    this.build();
+    this.layout();
   }
 }
 

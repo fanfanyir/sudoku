@@ -45,11 +45,28 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 	const Grid = __webpack_require__(1);
+	const Popupnumbers = __webpack_require__(5);
 	
 	const grid = new Grid($("#container"));
 	
 	grid.build();
 	grid.layout();
+	
+	const popupnumbers = new Popupnumbers($("#popupNumbers"));
+	grid.bindPopup(popupnumbers);
+	
+	$("#check").on("click", e => {
+	  grid.check();
+	});
+	$("#reset").on("click", e => {
+	  grid.reset();
+	});
+	$("#clear").on("click", e => {
+	  grid.clear();
+	});
+	$("#rebuild").on("click", e => {
+	  grid.rebuild();
+	});
 
 /***/ }),
 /* 1 */
@@ -58,6 +75,8 @@
 	// 生成九宫格
 	
 	const Toolkit = __webpack_require__(2);
+	const Generator = __webpack_require__(3);
+	const Sudoku = __webpack_require__(4);
 	
 	class Grid {
 	  constructor(container) {
@@ -65,7 +84,13 @@
 	  }
 	
 	  build() {
-	    const matrix = Toolkit.matrix.makeMatrix();
+	    // const generator = new Generator();
+	    // generator.generate();
+	    // const matrix = generator.matrix;
+	
+	    const sudoku = new Sudoku();
+	    sudoku.make(4);
+	    const matrix = sudoku.puzzleMatrix;
 	
 	    const rowGroupClasses = ["row_g_top", "row_g_middle", "row_g_bottom"];
 	    const colGroupClasses = ["col_g_left", "col_g_center", "col_g_right"];
@@ -74,6 +99,7 @@
 	      .map((cellValue, colIndex) => {
 	        return $("<span>")
 	            .addClass(colGroupClasses[colIndex % 3])
+	            .addClass(cellValue ? "fixed" : "empty")
 	            .text(cellValue)
 	    }));
 	
@@ -95,6 +121,41 @@
 	        "line-height": `${width}px`,
 	        "font-size": width < 32 ? `${width / 2}px` : ""
 	      })
+	  }
+	
+	  bindPopup(popupNumbers) {
+	    this._$container.on("click", "span", e => {
+	      const $cell = $(e.target);
+	      popupNumbers.popup($cell);
+	    });
+	  }
+	
+	  /**
+	   * 检查用户解谜的结果，成功进行提示，失败提示错误位置的标记
+	   */
+	  check() {
+	  }
+	
+	  /**
+	   * 重置当前谜盘到初始状态
+	   */
+	  reset() {
+	  }
+	
+	
+	  /**
+	   * 清理错误标记
+	   */
+	  clear() {
+	  }
+	
+	  /**
+	   * 重建新的谜盘，开始新一局
+	   */
+	  rebuild() {
+	    this._$container.empty();
+	    this.build();
+	    this.layout();
 	  }
 	}
 	
@@ -197,6 +258,169 @@
 	    return boxToolit;
 	  }
 	};
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	// 生成数独解决方案
+	const Toolkit = __webpack_require__(2)
+	
+	module.exports = class Generator {
+	  generate() {
+	    while (!this.internalGenerate()) {
+	      console.log("try again")
+	    }
+	  }
+	
+	  internalGenerate() {
+	    this.matrix = Toolkit.matrix.makeMatrix();
+	    this.orders = Toolkit.matrix.makeMatrix()
+	        .map(row => row.map((v, i) => i))
+	        .map(row => Toolkit.matrix.shuffle(row));
+	
+	    // Toolkit.matrix.makeRow
+	
+	    for(let n = 1; n <= 9; n++){
+	      if (!this.fillNumber(n)){
+	        return false;
+	      }
+	    }
+	    return true
+	  }
+	
+	  fillNumber(n){
+	    return this.fillRow(n, 0);
+	  }
+	
+	  fillRow(n, rowIndex) {
+	    if (rowIndex > 8){
+	      return true;
+	    }
+	
+	    const row = this.matrix[rowIndex];
+	    const orders = this.orders[rowIndex];
+	    // TODO 随机选择列
+	    for (let i = 0; i < 9; i++){
+	      const colIndex = orders[i];
+	
+	      // 这个位置已经有值，跳过
+	      if(row[colIndex]) {
+	        continue;
+	      }
+	
+	      // 检查这个位置是否可以填 n
+	      if(!Toolkit.matrix.checkFillable(this.matrix, n, rowIndex, colIndex)) {
+	        continue;
+	      }
+	
+	      // 去下一行填写 n，如果没填进去，就继续寻找当前行下一个位置
+	      row[colIndex] = n;
+	      // // 当前行填写 n 成功， 递归调用 fillRow 来在下一行中填写 n
+	      // this.fillRow(n, rowIndex + 1);
+	      if(!this.fillRow(n, rowIndex + 1)){
+	        row[colIndex] = 0;
+	        continue;
+	      }
+	
+	      return true;
+	    }
+	
+	    return false;
+	  }
+	}
+	
+	// const generator = new Generator();
+	// generator.generate();
+	// console.log(generator.matrix);
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	// 生成数独游戏
+	
+	// 1. 生成完成的解决方案： Generator
+	
+	// 2. 随机去除部分数据：按比例
+	
+	const Generator = __webpack_require__(3);
+	
+	module.exports = class Sudoku {
+	  constructor(){
+	    // 生成完成的解决方案
+	    const generator = new Generator();
+	    generator.generate();
+	    this.solutionMatrix = generator.matrix;
+	  }
+	
+	  make(level = 5){
+	    // const shouldRid = Math.random() * 9 < level;
+	    // 生成谜盘
+	    this.puzzleMatrix = this.solutionMatrix.map(row => {
+	      return row.map(cell => Math.random() * 9 < level ? 0  : cell);
+	    });
+	  }
+	}
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+	// 处理弹出的操作面板
+	
+	module.exports = class PopupNumbers {
+	  constructor($panel) {
+	    this._$panel = $panel.hide().removeClass("hidden");
+	    this._$panel.on("click", "span", e => {
+	      const $cell = this._$targetCell;
+	      const $span = $(e.target);
+	
+	      if ($span.hasClass("mark1")){
+	        // mark1 回填样式
+	        if($cell.hasClass("mark1")){
+	          $cell.removeClass("mark1");
+	        }else{
+	          $cell.removeClass("mark2")
+	          .addClass("mark1");
+	        }
+	      } else if ($span.hasClass("mark2")){
+	        // mark2 回填样式
+	        if($cell.hasClass("mark2")){
+	          $cell.removeClass("mark2");
+	        }else{
+	          $cell.removeClass("mark1")
+	          .addClass("mark2");
+	        }
+	      }else if($span.hasClass("empty")){
+	        // empty 取消数字填写，取消mark
+	        $cell.text(0)
+	        .addClass("empty");
+	      } else {
+	        // 1-9 回填数字
+	        $cell.removeClass("empty").text($span.text());
+	      }
+	
+	      this.hide();
+	      return;
+	    })
+	  }
+	
+	  popup($cell) {
+	    this._$targetCell = $cell;
+	    const {left, top} = $cell.position();
+	    this._$panel
+	    .css({
+	      left: `${left}px`,
+	      top: `${top}px`
+	    })
+	    .show();
+	  }
+	
+	  hide() {
+	    this._$panel.hide();
+	  }
+	}
 
 /***/ })
 /******/ ]);
