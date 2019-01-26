@@ -1,4 +1,3 @@
-
 module.exports = {
   entry: {
     index: "./js/index"
@@ -8,17 +7,22 @@ module.exports = {
   },
   devtool: "source-map",
   resolve: {
-    extensions: [".js"]
+    extensions: [".ts"]
   },
   module: {
-    loader: [
+    rules: [
       {
-        test: /\.js$/,
-        loader:  "babel",
-        exclude: "node_modules",
-        query: {
-          presets: ["es2015"]
-        }
+        test: /\.ts$/,
+        use:  [
+          {
+            loader: "babel-loader",
+            options: {
+              presets: ["es2015"]
+            }
+          },
+          "ts-loader"
+        ],
+        exclude: /node_modules/
       }
     ]
   }

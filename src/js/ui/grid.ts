@@ -1,12 +1,12 @@
 // 生成九宫格
-
-const Toolkit = require("../core/toolkit");
-const Generator = require("../core/generator");
-const Sudoku = require("../core/sudoku");
-const Checker = require("../core/checker");
+import Sudoku from "../core/sudoku";
+import Checker from "../core/checker";
+import PopupNumbers from "./popupnumbers";
 
 class Grid {
-  constructor(container) {
+  private _$container: JQuery;
+
+  constructor(container: JQuery) {
     this._$container = container;
   }
 
@@ -51,7 +51,7 @@ class Grid {
       })
   }
 
-  bindPopup(popupNumbers) {
+  bindPopup(popupNumbers: PopupNumbers) {
     this._$container.on("click", "span", e => {
       const $cell = $(e.target);
       if($cell.is(".fixed"))  return;
@@ -65,12 +65,12 @@ class Grid {
   check() {
     // 从界面获取需要检查的数据
     const data = this._$container.children()
-      .map((rowIndex, div) => {
+      .toArray()
+      .map((div: HTMLElement): number[] => {
         return $(div).children()
-            .map((colIndex, span) => parseInt($(span).text()) || 0);
-      })
-    .toArray()
-    .map($data => $data.toArray());
+            .toArray()
+            .map(span => parseInt($(span).text(), 10) || 0);
+      });
 
     const checker = new Checker(data);
     if(checker.check()){
@@ -121,4 +121,5 @@ class Grid {
   }
 }
 
-module.exports = Grid;
+export { Grid };
+export default Grid;

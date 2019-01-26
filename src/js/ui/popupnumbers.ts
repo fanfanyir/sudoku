@@ -1,7 +1,10 @@
 // 处理弹出的操作面板
+export class PopupNumbers {
+  private _$panel: JQuery;
+  
+  private _$targetCell: JQuery;
 
-module.exports = class PopupNumbers {
-  constructor($panel) {
+  constructor($panel: JQuery) {
     this._$panel = $panel.hide().removeClass("hidden");
     this._$panel.on("click", "span", e => {
       const $cell = this._$targetCell;
@@ -37,7 +40,7 @@ module.exports = class PopupNumbers {
     })
   }
 
-  popup($cell) {
+  popup($cell: JQuery) {
     this._$targetCell = $cell;
     const {left, top} = $cell.position();
     this._$panel
@@ -52,3 +55,5 @@ module.exports = class PopupNumbers {
     this._$panel.hide();
   }
 }
+
+export default PopupNumbers;
