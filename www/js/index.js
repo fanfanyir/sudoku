@@ -79,60 +79,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
- * 矩阵和数组相关工具
- */
-var matrixToolkit = {
-    makeRow: function makeRow() {
-        var v = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-        var array = new Array(9);
-        array.fill(v);
-        return array;
-    },
-    makeMatrix: function makeMatrix() {
-        var _this = this;
-
-        var v = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-        return Array.from({ length: 9 }, function () {
-            return _this.makeRow(v);
-        });
-    },
-
-    /**
-     * Fisher-Yates 洗牌算法
-     */
-    shuffle: function shuffle(array) {
-        var endIndex = array.length - 2;
-        for (var i = 0; i < endIndex; i++) {
-            var j = i + Math.floor(Math.random() * (array.length - i));
-            var _ref = [array[j], array[i]];
-            array[i] = _ref[0];
-            array[j] = _ref[1];
-        }
-        return array;
-    },
-
-    /**
-     * TODO 检查指定位置可以填写数字 n
-     */
-    checkFillable: function checkFillable(matrix, n, rowIndex, colIndex) {
-        var row = matrix[rowIndex];
-        var column = this.makeRow().map(function (v, i) {
-            return matrix[i][colIndex];
-        });
-
-        var _boxToolkit$converToB = boxToolkit.converToBoxIndex(rowIndex, colIndex),
-            boxIndex = _boxToolkit$converToB.boxIndex;
-
-        var box = boxToolkit.getBoxCells(matrix, boxIndex);
-        for (var i = 0; i < 9; i++) {
-            if (row[i] === n || column[i] === n || box[i] === n) return false;
-        }
-        return true;
-    }
-};
-/**
  * 宫坐标系工具
  */
 var boxToolkit = {
@@ -160,6 +106,78 @@ var boxToolkit = {
         };
     }
 };
+/**
+* 矩阵和数组相关工具
+*/
+
+var MatrixToolkit = function () {
+    function MatrixToolkit() {
+        _classCallCheck(this, MatrixToolkit);
+    }
+
+    _createClass(MatrixToolkit, null, [{
+        key: "makeRow",
+        value: function makeRow() {
+            var v = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+
+            var array = new Array(9);
+            array.fill(v);
+            return array;
+        }
+    }, {
+        key: "makeMatrix",
+        value: function makeMatrix() {
+            var _this = this;
+
+            var v = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+
+            return Array.from({ length: 9 }, function () {
+                return _this.makeRow(v);
+            });
+        }
+        /**
+         * Fisher-Yates 洗牌算法
+         */
+
+    }, {
+        key: "shuffle",
+        value: function shuffle(array) {
+            var endIndex = array.length - 2;
+            for (var i = 0; i < endIndex; i++) {
+                var j = i + Math.floor(Math.random() * (array.length - i));
+                var _ref = [array[j], array[i]];
+                array[i] = _ref[0];
+                array[j] = _ref[1];
+            }
+            return array;
+        }
+        /**
+         * TODO 检查指定位置可以填写数字 n
+         */
+
+    }, {
+        key: "checkFillable",
+        value: function checkFillable(matrix, n, rowIndex, colIndex) {
+            var row = matrix[rowIndex];
+            var column = this.makeRow().map(function (v, i) {
+                return matrix[i][colIndex];
+            });
+
+            var _boxToolkit$converToB = boxToolkit.converToBoxIndex(rowIndex, colIndex),
+                boxIndex = _boxToolkit$converToB.boxIndex;
+
+            var box = boxToolkit.getBoxCells(matrix, boxIndex);
+            for (var i = 0; i < 9; i++) {
+                if (row[i] === n || column[i] === n || box[i] === n) return false;
+            }
+            return true;
+        }
+    }]);
+
+    return MatrixToolkit;
+}();
+
+;
 // 工具集
 
 var Toolkit = function () {
@@ -174,7 +192,7 @@ var Toolkit = function () {
          * 矩阵和数组相关的工具
          */
         get: function get() {
-            return matrixToolkit;
+            return MatrixToolkit;
         }
         /**
          * 宫坐标系相关的工具
@@ -265,12 +283,10 @@ var Grid = function () {
         key: "check",
         value: function check() {
             // 从界面获取需要检查的数据
-            var data = this._$container.children().map(function (rowIndex, div) {
-                return $(div).children().map(function (colIndex, span) {
-                    return parseInt($(span).text()) || 0;
+            var data = this._$container.children().toArray().map(function (div) {
+                return $(div).children().toArray().map(function (span) {
+                    return parseInt($(span).text(), 10) || 0;
                 });
-            }).toArray().map(function ($data) {
-                return $data.toArray();
             });
             var checker = new checker_1.default(data);
             if (checker.check()) {
