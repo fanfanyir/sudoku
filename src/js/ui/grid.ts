@@ -10,13 +10,13 @@ class Grid {
     this._$container = container;
   }
 
-  build() {
+  build(level: number = 4) {
     // const generator = new Generator();
     // generator.generate();
     // const matrix = generator.matrix;
 
     const sudoku = new Sudoku();
-    sudoku.make();
+    sudoku.make(level);
     const matrix = sudoku.puzzleMatrix;
     // const matrix = sudoku.solutionMatrix;
 

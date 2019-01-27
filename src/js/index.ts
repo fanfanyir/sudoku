@@ -3,7 +3,7 @@ import Popupnumbers from "./ui/popupnumbers";
 
 const grid = new Grid($("#container"));
 
-grid.build();
+grid.build(4);
 grid.layout();
 
 const popupnumbers = new Popupnumbers($("#popupNumbers"));

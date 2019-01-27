@@ -238,11 +238,13 @@ var Grid = function () {
     _createClass(Grid, [{
         key: "build",
         value: function build() {
+            var level = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 4;
+
             // const generator = new Generator();
             // generator.generate();
             // const matrix = generator.matrix;
             var sudoku = new sudoku_1.default();
-            sudoku.make();
+            sudoku.make(level);
             var matrix = sudoku.puzzleMatrix;
             // const matrix = sudoku.solutionMatrix;
             var rowGroupClasses = ["row_g_top", "row_g_middle", "row_g_bottom"];
@@ -668,7 +670,7 @@ var Sudoku = function () {
     _createClass(Sudoku, [{
         key: "make",
         value: function make() {
-            var level = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 5;
+            var level = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 4;
 
             // const shouldRid = Math.random() * 9 < level;
             // 生成谜盘
@@ -698,7 +700,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var grid_1 = __webpack_require__(1);
 var popupnumbers_1 = __webpack_require__(2);
 var grid = new grid_1.default($("#container"));
-grid.build();
+grid.build(4);
 grid.layout();
 var popupnumbers = new popupnumbers_1.default($("#popupNumbers"));
 grid.bindPopup(popupnumbers);
